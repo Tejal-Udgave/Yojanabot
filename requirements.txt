@@ -1,0 +1,7 @@
+langchain==0.3.27
+langchain-community
+langchain-core
+langchain-google-genai
+google-search-results
+streamlit
+python-dotenv

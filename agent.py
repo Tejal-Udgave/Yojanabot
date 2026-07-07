@@ -22,7 +22,6 @@ from langchain.agents import (
 
 # Prompt Template
 from langchain.prompts import PromptTemplate
-#from langchain import hub
 
 # Load variables from .env
 load_dotenv()
@@ -166,7 +165,7 @@ tools = [
     Tool(
         name="GovernmentSchemeSearch",
         func=search.run,
-        description=SYSTEM_PROMPT + """
+        description= """
         Use this tool to search for Indian government schemes,eligibility criteria, required documents,
         application process, official portals,
         and government notifications.
@@ -181,30 +180,17 @@ tools = [
     )
 ]
 
-#prompt = PromptTemplate.from_template(
-#    SYSTEM_PROMPT + """
+LANGUAGE_RULE = """
+CRITICAL LANGUAGE RULE:
+Always respond in the SAME language as the user's CURRENT question below,
+regardless of what language earlier turns in the conversation were in.
+If the current question is in English, respond in English.
+If in Hindi, respond in Hindi.
+If in Marathi, respond in Marathi.
+Do not let previous chat history influence your choice of language.
+"""
 
-#Available Tools:
-#{tools}
-
-#Tool Names:
-#{tool_names}
-
-#Conversation History:
-#{chat_history}
-
-#User:
-#{input}
-
-#{agent_scratchpad}
-#"""
-#)
-
-#prompt = hub.pull("hwchase17/react",dangerously_pull_public_prompt=True)
-#os.environ["LANGCHAIN_HUB_UNSAFE_DESERIALIZATION"] = "true"
-#prompt = hub.pull("hwchase17/react")
-
-react_template = """You are a helpful assistant. Answer the following question using the tools available.
+react_template = SYSTEM_PROMPT + LANGUAGE_RULE + """You are a helpful assistant. Answer the following question using the tools available.
 
 You have access to the following tools:
 
@@ -223,6 +209,9 @@ IMPORTANT: Always end with "Final Answer:" followed by your complete response.
 Never skip the "Final Answer:" line.
 Never respond outside this format.
 
+Previous Conversation:
+{chat_history}
+
 Begin!
 
 Question: {input}
@@ -240,7 +229,8 @@ agent_executor = AgentExecutor(
     agent=agent,
     tools=tools,
     verbose=True,
-    max_iterations=3,
+    max_iterations=6,
+    early_stopping_method="generate",
     handle_parsing_errors="Check your output and make sure it follows the correct format. Use Action: and Action Input: properly."
 )
 
